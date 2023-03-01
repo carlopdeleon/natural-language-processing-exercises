@@ -64,7 +64,34 @@ def get_blog_articles():
 
 #------------------------------------------------------------------------------------------------------------
 
-def get_blog_articles_json(article_list):
+def article_list_codeup():
+    '''
+    Retrieves list of links for Codeup's blog.
+    '''
+
+    # Get 
+    url = 'https://codeup.com/blog/'
+    headers = {'User-Agent': 'Codeup Data Science'}
+    response = get(url, headers=headers)
+    
+    # BeautifulSoup
+    soup = BeautifulSoup(response.content, 'html.parser')  
+
+    # Filter for content
+    article = soup.find_all('a', class_='entry-featured-image-url')
+
+    # For Loop to save links into list
+    articles = []
+    for element in article:
+        articles.append(element['href'])
+
+    return articles
+
+
+
+#------------------------------------------------------------------------------------------------------------
+
+def get_blog_articles_json():
     
     '''
     Scrapes codeup blog artilces and saves it into a JSON file.
@@ -77,6 +104,9 @@ def get_blog_articles_json(article_list):
         with open(file) as f:
             return json.load(f)
     
+    # List of articles
+    article_list = article_list_codeup()
+
     # Header to authentify
     headers = {'User-Agent': 'Codeup Data Science'}
     
@@ -91,7 +121,7 @@ def get_blog_articles_json(article_list):
         soup = BeautifulSoup(response.content, 'html.parser')
         
         info_dict = {'title': soup.find('h1').text,
-                     'link': link,
+                     'link': article,
                      'date_published': soup.find('span', class_='published').text,
                      'content': soup.find('div', class_='entry-content').text}
     
@@ -121,7 +151,7 @@ def scrape_one_page(topic):
     
     titles = soup.find_all('span', itemprop='headline')
     
-    summaries = soup_business.find_all('div', itemprop='articleBody')
+    summaries = soup.find_all('div', itemprop='articleBody')
     
     summary_list = []
     
